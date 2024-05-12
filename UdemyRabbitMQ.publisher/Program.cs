@@ -50,23 +50,22 @@ namespace UdemyRabbitMQ.publisher
 
             factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih");
 
-
             using var connection = factory.CreateConnection();
 
             var channel = connection.CreateModel();
 
+            channel.ExchangeDeclare("logs-fanout",durable:true,type:ExchangeType.Fanout);  // Exchange olusturuyoruz. 1.paramatre exchange adı. 2.parametre uygulama restartta atsa exchange kaybolmasın.
+
             Enumerable.Range(1, 50).ToList().ForEach(x =>
             {
-                string message = $"Message {x}";
+                string message = $"log {x}";
 
                 var messageBody = Encoding.UTF8.GetBytes(message);
-
-                channel.BasicPublish(string.Empty, "hello-queue", null, messageBody); //Mesajı gönderiyoruz. Birinci parametre exchange değil direkt kuyruğa göndereceksek empty yapıyoruz. 2. parametre göndereceğimiz kuyrul. 3. parametre ekstra bir özellik olacakmı. 4. parametre gönderilecek veri.
+                channel.BasicPublish("logs-fanout","", null, messageBody); //1.parametrede exchange'in adını veriyoruz. 2.parametrede kuyrugu publisher olusturmayacağı için boş bırakıyoruz.
 
                 Console.WriteLine($"Mesaj gönderilmiştir. : {message}");
-
-
             });
+
 
 
             Console.ReadLine();
