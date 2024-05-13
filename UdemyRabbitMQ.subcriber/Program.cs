@@ -99,8 +99,54 @@ namespace UdemyRabbitMQ.subcriber
 
 
 
-            //DIRECT EXCHANGE
+            ////DIRECT EXCHANGE
+            //var factory = new ConnectionFactory();
 
+            //factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih");
+
+
+            //using var connection = factory.CreateConnection();
+
+
+            //var channel = connection.CreateModel();
+
+            ////publisher tarafıdna olusturdugumuz için burada olusturmamıza gerek yok. O yüzden yoruma alındı
+            ////channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);  // Exchange olusturuyoruz. 1.paramatre exchange adı. 2.parametre uygulama restartta atsa exchange kaybolmasın.
+
+
+            //channel.BasicQos(0, 1, false); // 1.parametre boyut herhangi bir boyuttaki mesajı gönderebilirsin. 2.parametre kaç kaç mesaj gelsin. 3.parametre değer global olsunmu yani her bir subcribera eğer 2. parametre 6 seçildiyse ve 3.parametre true ise herbir sucribera 2 ser 2ser gönderir. Eğer false ise herbir sucribera 6'sar 6'sar gönderir.
+
+            //var consumer = new EventingBasicConsumer(channel);
+
+            //var queueName = "direct-queue-Ciritical";
+
+            //channel.BasicConsume(queueName, false, consumer); // dinleyeceği kuyruğu belirtiyoruz. // ikinci parametre true yaparsan rabbitmq kuyruktan bir mesaj gönderdiğinde yanlısda dogruda gönderse siler, false yaparsan silmez
+
+            //Console.WriteLine("Loglar Dinleniyor");
+
+            //consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+            //{  //RabbitMq subcribera mesaj gönderdiğinde buradaki event fırlar ve burada yakalarız.
+            //    var message = Encoding.UTF8.GetString(e.Body.ToArray());
+
+            //    Thread.Sleep(1000);
+            //    Console.WriteLine("Gelen Mesaj : " + message);
+
+            //    //File.AppendAllText("log-critical.txt", message + "\n");
+
+            //    channel.BasicAck(e.DeliveryTag, false); //işlem başarılıysa işlemi siliyor. // 2. parametre memoryde işlenmiş ama rabbitmq gitmemiş mesajları rabbitmq a haberdar eder.
+            //};
+
+            //Console.ReadLine();
+
+
+
+
+
+
+
+
+
+            //TOPIC EXCHANGE
             var factory = new ConnectionFactory();
 
             factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih");
@@ -112,14 +158,15 @@ namespace UdemyRabbitMQ.subcriber
             var channel = connection.CreateModel();
 
             //publisher tarafıdna olusturdugumuz için burada olusturmamıza gerek yok. O yüzden yoruma alındı
-            //channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);  // Exchange olusturuyoruz. 1.paramatre exchange adı. 2.parametre uygulama restartta atsa exchange kaybolmasın.
-
 
             channel.BasicQos(0, 1, false); // 1.parametre boyut herhangi bir boyuttaki mesajı gönderebilirsin. 2.parametre kaç kaç mesaj gelsin. 3.parametre değer global olsunmu yani her bir subcribera eğer 2. parametre 6 seçildiyse ve 3.parametre true ise herbir sucribera 2 ser 2ser gönderir. Eğer false ise herbir sucribera 6'sar 6'sar gönderir.
 
             var consumer = new EventingBasicConsumer(channel);
 
-            var queueName = "direct-queue-Ciritical";
+            var queueName = channel.QueueDeclare().QueueName;
+            var routekey = "Info.#";//Başı Info olsun sonu önemli değil   //"*.*.Warning";//Sonu Warning olanlar gelsin             //"*.Error.*"; // Ortasıda error olan başı sonu önemli değil.
+
+            channel.QueueBind(queueName,"logs-topic",routekey);
 
             channel.BasicConsume(queueName, false, consumer); // dinleyeceği kuyruğu belirtiyoruz. // ikinci parametre true yaparsan rabbitmq kuyruktan bir mesaj gönderdiğinde yanlısda dogruda gönderse siler, false yaparsan silmez
 
@@ -138,8 +185,6 @@ namespace UdemyRabbitMQ.subcriber
             };
 
             Console.ReadLine();
-
-
 
 
         }
