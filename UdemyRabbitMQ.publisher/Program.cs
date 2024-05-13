@@ -186,32 +186,19 @@ namespace UdemyRabbitMQ.publisher
 
             var channel = connection.CreateModel(); // Kanal (channel) oluşturuluyor.
 
-            channel.ExchangeDeclare("logs-topic", durable: true, type: ExchangeType.Topic); // Topic tipinde bir exchange oluşturuluyor.
+            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers); // Topic tipinde bir exchange oluşturuluyor.
+            
+            Dictionary<string,object> headers = new Dictionary<string, object>();
 
+            headers.Add("format", "pdf");
+            headers.Add("share", "a4");
 
-            // Rastgele log mesajları yayınlamak için bir döngü oluşturuluyor.
-            Random rnd = new Random();
-            Enumerable.Range(1, 50).ToList().ForEach(x =>
-            {
-                LogNames log = (LogNames)new Random().Next(1, 5); // Rastgele bir log türü seçiliyor.
+            var properties = channel.CreateBasicProperties();
+            properties.Headers = headers;
 
-                LogNames log1 = (LogNames)rnd.Next(1, 5);
-                LogNames log2 = (LogNames)rnd.Next(1, 5);
-                LogNames log3 = (LogNames)rnd.Next(1, 5);
+            channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım")); //1. parametre exchange adı, ikinci parametre routekey, 3.parametre header, 4.parametre mesajın içeriği
 
-                var routeKey = $"{log1}.{log2}.{log3}";
-
-
-                string message = $"log-type : {log1}-{log2}-{log3}"; // Log mesajı oluşturuluyor.
-
-                var messageBody = Encoding.UTF8.GetBytes(message); // Mesaj byte dizisine dönüştürülüyor.
-
-                // Log mesajı yayınlanıyor.
-                channel.BasicPublish("logs-topic", routeKey, null, messageBody);
-
-                Console.WriteLine($"Log gönderilmiştir. : {message}"); // Yayınlanan log mesajı konsola yazdırılıyor.
-            });
-
+            Console.WriteLine("Mesaj gönderilmiştir.");
 
             Console.ReadLine();
 

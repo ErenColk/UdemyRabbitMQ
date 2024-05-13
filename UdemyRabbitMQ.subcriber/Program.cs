@@ -146,7 +146,55 @@ namespace UdemyRabbitMQ.subcriber
 
 
 
-            //TOPIC EXCHANGE
+            ////TOPIC EXCHANGE
+            //var factory = new ConnectionFactory();
+
+            //factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih");
+
+
+            //using var connection = factory.CreateConnection();
+
+
+            //var channel = connection.CreateModel();
+
+            ////publisher tarafıdna olusturdugumuz için burada olusturmamıza gerek yok. O yüzden yoruma alındı
+
+            //channel.BasicQos(0, 1, false); // 1.parametre boyut herhangi bir boyuttaki mesajı gönderebilirsin. 2.parametre kaç kaç mesaj gelsin. 3.parametre değer global olsunmu yani her bir subcribera eğer 2. parametre 6 seçildiyse ve 3.parametre true ise herbir sucribera 2 ser 2ser gönderir. Eğer false ise herbir sucribera 6'sar 6'sar gönderir.
+
+            //var consumer = new EventingBasicConsumer(channel);
+
+            //var queueName = channel.QueueDeclare().QueueName;
+            //var routekey = "Info.#";//Başı Info olsun sonu önemli değil   //"*.*.Warning";//Sonu Warning olanlar gelsin             //"*.Error.*"; // Ortasıda error olan başı sonu önemli değil.
+
+            //channel.QueueBind(queueName,"logs-topic",routekey);
+
+            //channel.BasicConsume(queueName, false, consumer); // dinleyeceği kuyruğu belirtiyoruz. // ikinci parametre true yaparsan rabbitmq kuyruktan bir mesaj gönderdiğinde yanlısda dogruda gönderse siler, false yaparsan silmez
+
+            //Console.WriteLine("Loglar Dinleniyor");
+
+            //consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
+            //{  //RabbitMq subcribera mesaj gönderdiğinde buradaki event fırlar ve burada yakalarız.
+            //    var message = Encoding.UTF8.GetString(e.Body.ToArray());
+
+            //    Thread.Sleep(1000);
+            //    Console.WriteLine("Gelen Mesaj : " + message);
+
+            //    //File.AppendAllText("log-critical.txt", message + "\n");
+
+            //    channel.BasicAck(e.DeliveryTag, false); //işlem başarılıysa işlemi siliyor. // 2. parametre memoryde işlenmiş ama rabbitmq gitmemiş mesajları rabbitmq a haberdar eder.
+            //};
+
+            //Console.ReadLine();
+
+
+
+
+
+
+
+
+
+            //HEADER EXCHANGE
             var factory = new ConnectionFactory();
 
             factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih");
@@ -164,9 +212,16 @@ namespace UdemyRabbitMQ.subcriber
             var consumer = new EventingBasicConsumer(channel);
 
             var queueName = channel.QueueDeclare().QueueName;
-            var routekey = "Info.#";//Başı Info olsun sonu önemli değil   //"*.*.Warning";//Sonu Warning olanlar gelsin             //"*.Error.*"; // Ortasıda error olan başı sonu önemli değil.
 
-            channel.QueueBind(queueName,"logs-topic",routekey);
+            Dictionary<string,object> headers = new Dictionary<string, object>();
+            headers.Add("format", "pdf");
+            headers.Add("share", "a4");
+            headers.Add("x-match", "all"); // all ifadesi string ve value çiftrinini gelen işlemde eşlenmesi gerektiğini belirtir.
+            //headers.Add("x-match", "any"); // any ifadesi string ve value çiftinden herhangi birinin uymasının yeterli olmasıdır.
+
+            channel.QueueBind(queueName, "header-exchange",string.Empty,headers);
+
+
 
             channel.BasicConsume(queueName, false, consumer); // dinleyeceği kuyruğu belirtiyoruz. // ikinci parametre true yaparsan rabbitmq kuyruktan bir mesaj gönderdiğinde yanlısda dogruda gönderse siler, false yaparsan silmez
 
@@ -179,7 +234,6 @@ namespace UdemyRabbitMQ.subcriber
                 Thread.Sleep(1000);
                 Console.WriteLine("Gelen Mesaj : " + message);
 
-                //File.AppendAllText("log-critical.txt", message + "\n");
 
                 channel.BasicAck(e.DeliveryTag, false); //işlem başarılıysa işlemi siliyor. // 2. parametre memoryde işlenmiş ama rabbitmq gitmemiş mesajları rabbitmq a haberdar eder.
             };
@@ -187,13 +241,20 @@ namespace UdemyRabbitMQ.subcriber
             Console.ReadLine();
 
 
+
+
+
+
+
+
+
+
+
+
+            //NOOT : Exchange poublisher tarafında oluşturuyorsak önce publisherı ayağa kaldırmamız gerekiyorki kuyrugun baglanabileceği bir exchange olsun. Exchange'i istersek subcriber tarafındada oluşturabiliriz.
+
         }
 
 
-        //yukardaki 27.satıra yazıldı.
-        //private static void Consumer_Received(object? sender, BasicDeliverEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
