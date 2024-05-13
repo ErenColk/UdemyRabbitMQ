@@ -1,5 +1,7 @@
 ﻿using RabbitMQ.Client;
+using Shared;
 using System.Text;
+using System.Text.Json;
 
 namespace UdemyRabbitMQ.publisher
 {
@@ -65,7 +67,7 @@ namespace UdemyRabbitMQ.publisher
 
             //var channel = connection.CreateModel();
 
-            //channel.ExchangeDeclare("logs-fanout",durable:true,type:ExchangeType.Fanout);  // Exchange olusturuyoruz. 1.paramatre exchange adı. 2.parametre uygulama restartta atsa exchange kaybolmasın.
+            //channel.ExchangeDeclare("logs-fanout",durable:true,type:ExchangeType.Fanout);  // Exchange olusturuyoruz. 1.paramatre exchange adı. 2.parametre uygulama restartta atsa exchange kaybolmasın. Ayrıca exchange veya queueleri memoryde değil fiziksel yerde kaydeder. RabbitMq uygulaması restart edilse dahi mesajlar silinmez.
 
             //Enumerable.Range(1, 50).ToList().ForEach(x =>
             //{
@@ -175,29 +177,73 @@ namespace UdemyRabbitMQ.publisher
 
 
 
-            //HEADER EXCHANGE
-            //Routelama ile ilgili bilgileri Headerında gönderiyoruz. Key value lerin aynı olmasına bakıyoruz. format = pdf , shape = a4 gibi. x-match = any : iki değerden birinin uyması yeterli demek x-match = all dersek ikisininde uyması gerektiğini belirtiyoruz.
+            ////HEADER EXCHANGE
+            ////Routelama ile ilgili bilgileri Headerında gönderiyoruz. Key value lerin aynı olmasına bakıyoruz. format = pdf , shape = a4 gibi. x-match = any : iki değerden birinin uyması yeterli demek x-match = all dersek ikisininde uyması gerektiğini belirtiyoruz.
 
-            var factory = new ConnectionFactory(); // RabbitMQ bağlantı fabrikası oluşturuluyor.
+            //var factory = new ConnectionFactory(); // RabbitMQ bağlantı fabrikası oluşturuluyor.
 
-            factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih"); // RabbitMQ bağlantı adresi belirleniyor.
+            //factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih"); // RabbitMQ bağlantı adresi belirleniyor.
 
-            using var connection = factory.CreateConnection(); // Bağlantı oluşturuluyor ve "using" bloğu içinde otomatik olarak temizleniyor.
+            //using var connection = factory.CreateConnection(); // Bağlantı oluşturuluyor ve "using" bloğu içinde otomatik olarak temizleniyor.
 
-            var channel = connection.CreateModel(); // Kanal (channel) oluşturuluyor.
+            //var channel = connection.CreateModel(); // Kanal (channel) oluşturuluyor.
 
-            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers); // Topic tipinde bir exchange oluşturuluyor.
-            
-            Dictionary<string,object> headers = new Dictionary<string, object>();
+            //channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers); // Topic tipinde bir exchange oluşturuluyor.
 
+            //Dictionary<string, object> headers = new Dictionary<string, object>();
+
+            //headers.Add("format", "pdf");
+            //headers.Add("share", "a4");
+
+            //var properties = channel.CreateBasicProperties(); // Propertyler olusturulur ve headerları belirlenir.
+            //properties.Headers = headers;
+
+            ///*NOT*/
+            //properties.Persistent = true; //Gönderilen mesajlar kalıcı hale gelir. Bütün Exchangetypelar için geçerlidir. Aynı şekilde properties olusturulur ve persistentları true yapılır. Header eklememize gerek kalmadan.
+
+            //channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım")); //1. parametre exchange adı, ikinci parametre routekey, 3.parametre header, 4.parametre mesajın içeriği
+
+            //Console.WriteLine("Mesaj gönderilmiştir.");
+
+            //Console.ReadLine();
+
+
+
+
+
+
+
+            //COMPLEX TYPLEARI MESAJ OLARAK İLETMEK
+        
+            var factory = new ConnectionFactory(); 
+
+            factory.Uri = new Uri("amqps://cezgimih:Xo_fII9ov60oS1bqMUETJEKjNyAK-JC3@toad.rmq.cloudamqp.com/cezgimih"); 
+
+            using var connection = factory.CreateConnection(); 
+
+            var channel = connection.CreateModel(); 
+
+            channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers); 
+
+            Dictionary<string, object> headers = new Dictionary<string, object>();
             headers.Add("format", "pdf");
             headers.Add("share", "a4");
 
-            var properties = channel.CreateBasicProperties();
+            var properties = channel.CreateBasicProperties(); 
             properties.Headers = headers;
 
-            channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım")); //1. parametre exchange adı, ikinci parametre routekey, 3.parametre header, 4.parametre mesajın içeriği
+        properties.Persistent = true;
 
+            var product = new Product() {  // Öncelikle nesne olusturulur 
+            Id = 1,
+            Name = "Kalem",
+            Price = 100,
+            Stock = 1
+            };
+
+            var productJsonString = JsonSerializer.Serialize(product); // Json formatına çevrilir 
+
+            channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes(productJsonString));  // Buradada gönderilir
             Console.WriteLine("Mesaj gönderilmiştir.");
 
             Console.ReadLine();
