@@ -131,6 +131,11 @@ namespace UdemyRabbitMQ.publisher
 
             //Console.ReadLine();
 
+
+
+
+
+
             //TOPIC EXCHANGE
             //Route keyler Critical.Error.Warning gibi belirlenir. Yani noktalarla belirlenir.Consumer olarak mesajı dinlemek istiyorum direkt olarak route keyi yazıyoruz.Kuyruk oluşturma işlemi consumera bırakılır. .*Error.* : Ortasında Error yazsın sağında ve solunda ne yazdıgı önemli değil. #.Error : son kısmı error olanlar gelsin demektir. Detaylı routelama yapmak istediğimizde kullnacağımız Exchange tipidir.
 
