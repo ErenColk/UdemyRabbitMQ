@@ -33,7 +33,7 @@ namespace UdemyRabbitMQWeb.ExcelCreate
 
             var app = builder.Build();
 
-
+            
             using (var scope = app.Services.CreateScope())
             {
                 var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
