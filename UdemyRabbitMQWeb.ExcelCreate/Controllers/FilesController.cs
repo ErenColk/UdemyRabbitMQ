@@ -16,6 +16,7 @@ namespace UdemyRabbitMQWeb.ExcelCreate.Controllers
         {
             _appDbContext = appDbContext;
         }
+        [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file, int fileId)
         {
             if (file is not { Length: > 0 }) return BadRequest();
