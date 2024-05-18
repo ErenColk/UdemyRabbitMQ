@@ -1,4 +1,6 @@
+using FileCreateWorkerService.Models;
 using FileCreateWorkerService.Services;
+using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 
 namespace FileCreateWorkerService
@@ -16,6 +18,11 @@ namespace FileCreateWorkerService
                    // Configuration'ý doðrudan hostContext üzerinden alýyoruz
                    IConfiguration configuration = hostContext.Configuration;
 
+                   services.AddDbContext<AdventureWorks2019Context>(option =>
+                   {
+
+                       option.UseSqlServer(configuration.GetConnectionString("SqlServer"));
+                   });
                    services.AddSingleton(sp => new ConnectionFactory()
                    {
                        Uri = new Uri(configuration.GetConnectionString("RabbitMQ")),
