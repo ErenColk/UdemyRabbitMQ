@@ -20,7 +20,6 @@ namespace FileCreateWorkerService
 
                    services.AddDbContext<AdventureWorks2019Context>(option =>
                    {
-
                        option.UseSqlServer(configuration.GetConnectionString("SqlServer"));
                    });
                    services.AddSingleton(sp => new ConnectionFactory()
